@@ -11,25 +11,28 @@ void main(){
 	ifstream infile;
 	infile.open("data.dat");
 	string val, tempdata;
-	//int pageSize, offset;
+	int pageSize, offset;
 	//cout << "Please enter page size";
 	//cin >> pageSize;
-//	offset = log2(pageSize);
+	pageSize = 128;
+	offset = log2(pageSize);
 	
-	while ( infile >> val >> hex >> tempdata)
+	while ( infile >> val >> tempdata)
 	{
-		
-		//cout << tempdata << endl;
-
-		bitset<32> addr(string(tempdata));
-		//addr = data;
+		cout << tempdata << endl;
+		stringstream ss;
+		ss << hex << tempdata;
+		unsigned n;
+		ss >> n;
+		bitset<32> addr(n);
+		addr = addr >> offset;
+		cout << addr << endl;
+		cout << hex << addr.to_ulong() << endl;
 		//function to convert to binary 
 		//(data)
 		//data = data << offset;
 		// shift right by offset (shiftBits = log2(pageSize))
-		// For loop to store page number in vector 
-		cout << addr << endl;
-		
+		// For loop to store page number in vector 		
 	}
 
 
