@@ -1,8 +1,9 @@
-
 #include<iostream>
 #include<fstream>
 #include<sstream>
 #include<bitset>
+#include<queue>
+#include<cmath>
 
 using namespace std;
 
@@ -13,16 +14,27 @@ void main() {
 	infile.open("data.dat");
 	int val;
 	string data;
-	
+	int pageSize, offset, limit;
+	int pageFault = 0;
+	int i = 0;
+	int min = 0;
 
-    //string data;
-	//int pageSize, offset;
-	//cout << "Please enter page size";
-	//cin >> pageSize;
-	//	offset = log2(pageSize);
+	//string data;
 
+	cout << "Please enter page size" << endl;
+	cin >> pageSize;
+	offset = int(log2(pageSize));
+	limit = pow(2, (32 - offset));
+	vector <int> pageTable(limit);
+
+	// grabing the addresses
 	while (infile >> val >> data)
 	{
+		// validating input
+		if (data.length() > 8) {
+			cout << "Bad address" << endl;
+		}
+
 		//data = "0x" + data;
 		data.insert(0, "0x");
 
@@ -31,40 +43,59 @@ void main() {
 		ss << hex << data;
 		unsigned n;
 		ss >> n;
-		bitset<32> address(n);
-		
-	
+		bitset<32> addr(n);
 
-		//(data)
-		//data = data << offset;
-		// shift right by offset (shiftBits = log2(pageSize))
-		// For loop to store page number in vector 
-		string binary = address.to_string();
+		// storing binary as string
+		string binary = addr.to_string();
+
 		// shift right by number offset bits
-		int offset = 3;
 		int stringindex = 32 - offset;
 		binary.erase(stringindex, offset);
 
-		//converting binary string to integer
-		int hexdata = stoi (binary, nullptr, 2);
+		//converting binary string to integer value
+		int address = stoi(binary, nullptr, 2);
 
-		// attempting to convert int to hex
-		
-				//char buffer[33];
-				//scanf_s("%d", &hexdata);
-				//_itoa_s(hexdata, buffer, 16);
-				//	printf("hexadecimal: %s\n", buffer);
-				
-				//ss << hex << address.to_ulong() << endl;
-				//ss >> hexdata;
-				//stringstream res;
-				//res << hex << uppercase << address.to_ulong();
-		
+		// For loop to search if int value exist in table
+		// if yes retun yes
+		// if not pagefault++ and swap using fifo if table is full
+		// if  (hexdata >= 0 && hexdata <= 2^25)
 
-		cout << data << endl << binary << endl  << hexdata << endl;
+	//	cout << address << endl;
+		// index value to accomplish FIFO
 		
+		bool firsttime = true;
+		if (firsttime) {
+			pageTable[0] = address;
+			firsttime = false;
+		}
 
+
+
+		else {
+			cout << "while pagetable" << endl;
+			for (vector<int>::iterator it = pageTable.begin(); it != pageTable.end(); it++) {
+				cout << "for iterator" << endl;
+				if (address == *it) {
+					break;
+				}
+				else {
+					pageFault++;
+					if (pageTable.size() < limit) {
+						pageTable[i] = address;
+						i++;
+					}
+					else {
+						if (min == limit) {
+							min = 0;
+						}
+						pageTable[min] = address;
+						min++;
+				    	}
+				}
+			}
+		}
 	}
-
-
-} 
+	cout << pageFault << endl;
+	system("pause");
+}
+		
